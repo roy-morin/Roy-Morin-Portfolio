@@ -1,87 +1,79 @@
 ---
 layout: cv
-title: Roy Morin's CV
+title: Roy Morin's Resume 
 ---
 # Roy Morin
-I am Spider-man
+
 
 
 <div id="webaddress">
-<a href="isaac@applesdofall.org">isaac@applesdofall.org</a>
-| <a href="http://en.wikipedia.org/wiki/Isaac_Newton">My wikipedia page</a>
+| <a href="https://www.linkedin.com/in/roy-morin">My LinkedIn page</a>
 </div>
-
-
-## Currently
-
-Standing on the shoulders of giants
-
-### Specialized in
-
-Laws of motion, gravitation, minting coins, disliking [Robert Hooke](http://en.wikipedia.org/wiki/Robert_Hooke)
-
-
-### Research interests
-
-Cooling, power series, optics, alchemy, planetary motions, apples.
 
 
 ## Education
 
-`1654-1660`
-__The King's School, Grantham.__
+__Western Wyoming Community College__
+`Rock Springs, Wyoming, Fall 2020 - Spring 2023`
 
-`June 1661 - now`
-__Trinity College, Cambridge__
+- Associates Degree in Mathematics
 
-- Sizar
+__Brigham Yound Universiry - Idaho__
+`Rexburg, Idaho, Fall 2023 - Current`
 
-`1667 - death`
-__Trinity College, Cambridge__
+- Pursuing Statistics Bachelor's
 
-- Fellow
 
+## Work Experience
+
+__Statistics__
+
+`Significant assignments as a BYU-I Student (2023 - Current)`
+
+- Worked with a real client to research consumer habits using R.
+
+- Created machine learning models with Wordle data with R.
+
+
+__City of Green River Parks and Recreation Department__
+
+`Seasonal Operations Assistent (May - August of 2021 - 2023, Green River, Wyoming)`
+
+- Setting and collecting mosquito traps, counting dead mosquitos, and checking for species that can carry West Nile Virus. Done on my own. 
+
+- Prepared baseball, softball, football, and soccer fields. Done with a team. 
+
+- Mowing with walk behind and riding mowers and tractors, trimming, weed whacking city property, and driving a fog truck to spray mosquitos. Done with a team and on my own. 
+
+- Assisted to training new employees. 
+
+__Green River Star__
+
+`Newpaper Deliverer (2013 - 2017, Green River, Wyoming)`
+
+- Pick up newspapers, fold them, and deliver them in a timely manner. 
+
+## Tools
+
+`Experience`
+
+- Working with a team (In sports and school projects)
+
+- Operating Machinery
+
+- Teaching a class
+
+- Mentoring incoming Freshman in High School
+
+- Coding with Python
+
+- Coding with R
 
 
 ## Awards
 
-`2012`
-President, *Royal Society*, London, UK
-
-Associate, *French Academy of Science*, Paris, France
-
-
-
-## Publications
-
-<!-- A list is also available [online](http://scholar.google.co.uk/citations?user=LTOTl0YAAAAJ) -->
-
-### Journals
-
-`1669`
-Newton Sir I, De analysi per æquationes numero terminorum infinitas. 
-
-`1669`
-Lectiones opticæ.
-
-etc. etc. etc.
-
-### Patents
-
-`2012`
-Infinitesimal calculus for solutions to physics problems, [SMBC](http://www.techdirt.com/articles/20121011/09312820678/if-patents-had-been-around-time-newton.shtml) patent 001
-
-
-## Occupation
-
-`1600`
-__Royal Mint__, London
-
-- Warden
-- Minted coins
-
-`1600`
-__Lucasian professor of Mathematics__, Cambridge University
+`2020`
+Student vs Staff Charity Basketball Game MVP
 
 
 
