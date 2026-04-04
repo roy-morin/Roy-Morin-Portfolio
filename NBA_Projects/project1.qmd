@@ -901,7 +901,7 @@ Reminder, Los Angeles is supporting 2 teams, and New York is supporting 2 teams,
 
 # Conclusion
 
-After diving into some of the statistics of the markets of areas with NBA teams, and potential areas for NBA teams, my main take away is that I would be shocked if the NBA expanded, and Seattle, Washington did not get a team. The market is great and a history of a team exists there already with the Seattle Supersonics. From the stats we looked at here, the second most likely to me would be Las Vegas. These top 2 make sense as they were the 2 named specifically when the NBA made their statement of exploring the possibility of expansion. I am looking forward to the end of 2026, when an update from the NBA is expected related to the exploration of expansion opportunities.
+After diving into some of the statistics of the markets of areas with NBA teams, and potential areas for NBA teams, the main takeaway from this analysis is that Seattle appears to be the strongest expansion market by a clear margin. The market is great and a history of a team exists there already with the Seattle Supersonics. Based on the variables used in this study, Las Vegas appears to be the second strongest candidate. These top 2 make sense as they were the 2 named specifically when the NBA made their statement of exploring the possibility of expansion. Many are looking forward to the end of 2026, when an update from the NBA is expected related to the exploration of expansion opportunities.
 Things that could be done to improve upon this case study would be to first include data if possible for places like Vancouver, Canada and Mexico City, Mexico, as well as to include other meaningful data such as T.V. market size for example.
 
 
