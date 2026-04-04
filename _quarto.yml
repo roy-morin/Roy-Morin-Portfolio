@@ -24,8 +24,8 @@ website:
         file: index.qmd
       - text: "My Resume"
         file: resume.qmd
-      - text: "Data Cleansing"
-        file: cleansing.qmd
+      - text: "NBA Projects"
+        file: nba.qmd
       - text: "Data Exploration"
         file: exploration.qmd
       - text: "Story Telling"
@@ -41,21 +41,21 @@ website:
   # comment out any of the sections below to turn off the sidebar
 
   sidebar: 
-    - title: "Data Cleansing"
+    - title: "NBA Projects"
       style: "docked"
       background: light
       contents:
-        - text: "Data Cleansing"
-          file: cleansing.qmd
+        - text: "My NBA Projects" # a case study -> stat analysis -> machine learning model project process could be neat to keep consistent.
+          file: nba.qmd
         - text: "---"
-        - text: "Project 1"
-          file: Cleansing_Projects/project1.qmd
+        - text: "NBA Expansion Case Study"
+          file: NBA_Projects/project1.qmd
         - text: "---"
         - text: "Project 2"
-          file: Cleansing_Projects/project2.qmd
+          file: NBA_Projects/project2.qmd
         - text: "---"
         - text: "Project 3"
-          file: Cleansing_Projects/project3.qmd
+          file: NBA_Projects/project3.qmd
         - text: "---"
     - title: "Data Exploration"
       style: "docked"

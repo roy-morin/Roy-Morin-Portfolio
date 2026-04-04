@@ -1,0 +1,920 @@
+---
+title: "Case Study - [NBA Expansion Exploration]"
+subtitle: "Course DS 350 - Semester Project"
+author: "[Roy Morin]"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+execute: 
+  warning: false
+    
+---
+
+```{r}
+# libraries
+pacman::p_load(tidyverse, stringr, stringi, rio, pander, hoopR, readxl, janitor, purrr, ggthemes, scales, patchwork, gridExtra)
+```
+
+# Intro
+
+The purpose of this case study is to look into the potential expansion of the NBA. The NBA has recently decided to formally explore expansion teams, specifically naming Seattle and Las Vegas. While there is no current confirmation if there will be an expansion or not, and if there is if it will be in Seattle or Las Vegas or somewhere else, the formal statement declaring opportunity is reason enough to take a deeper look. Note that data on Toronto, Canada for the Raptors will not be included, and potential options for expansion locations include Vancouver, Canada and Mexico City, Mexico, but we will not discuss their viability in this study. The expansion locations that will be included here are Seattle, Washington and Las Vegas, Nevada as the specifically mentioned locations, as well as Pittsburgh, Pennsylvania; Kansas City, Missouri; and Louisville, Kentucky as other potential expansion locations.
+
+## Data Explanation
+
+To evaluate expansion opportunity, this study uses three types of market data: estimated population from the U.S. Census, Regional Price Parities (RPP) from the Bureau of Economic Analysis (BEA), and Gross Domestic Product (GDP) from the BEA. Population is used to measure market size, GDP is used to measure economic scale, and RPP is used to approximate relative price levels across markets.
+
+Some limitations apply to these data. The RPP values used here are based on the metropolitan portion of each state rather than on individual metropolitan areas, so markets in the same state share the same RPP value. GDP data was available at the county level and was aggregated to the market level by summing the counties associated with each metropolitan area. Together, these variables provide a useful market-level comparison, even though they do not capture every factor the NBA would consider in a real expansion decision.
+
+
+```{r}
+#| warning: false
+#| message: false
+
+# census data (estimated population)
+est_pop <- read_excel("cbsa-met-est2025-pop.xlsx") |> 
+  drop_na() |> 
+  row_to_names(row_number = 1) |> 
+  filter(str_detect(`Geographic Area`, "Metro Area$")) 
+#View(est_pop)
+
+# RPP data, there is 1 metro stat for each state, still usable, but not bis
+rpp <- read_csv("PARPP_PORT_2008_2024.csv")|> 
+  drop_na()
+#View(rpp)
+
+# GDP data, longer since each dataset is each state.
+ar_gdp <- read_csv("CAGDP1_AR_2001_2024.csv")
+#View(ar_gdp)
+
+az_gdp <- read_csv("CAGDP1_AZ_2001_2024.csv")
+#View(az_gdp)
+
+ca_gdp <- read_csv("CAGDP1_CA_2001_2024.csv")
+#View(ca_gdp)
+
+co_gdp <- read_csv("CAGDP1_CO_2001_2024.csv", na = c("(NA)")) #had string NA values that were annoying
+#View(co_gdp)
+
+dc_gdp <- read_csv("CAGDP1_DC_2001_2024.csv")
+#View(dc_gdp)
+
+de_gdp <- read_csv("CAGDP1_DE_2001_2024.csv")
+#View(de_gdp)
+
+fl_gdp <- read_csv("CAGDP1_FL_2001_2024.csv")
+#View(fl_gdp)
+
+ga_gdp <- read_csv("CAGDP1_GA_2001_2024.csv")
+#View(ga_gdp)
+
+il_gdp <- read_csv("CAGDP1_IL_2001_2024.csv")
+#View(il_gdp)
+
+in_gdp <- read_csv("CAGDP1_IN_2001_2024.csv")
+#View(in_gdp)
+
+ks_gdp <- read_csv("CAGDP1_KS_2001_2024.csv")
+#View(ks_gdp)
+
+ky_gdp <- read_csv("CAGDP1_KY_2001_2024.csv")
+#View(ky_gdp)
+
+la_gdp <- read_csv("CAGDP1_LA_2001_2024.csv")
+#View(la_gdp)
+
+ma_gdp <- read_csv("CAGDP1_MA_2001_2024.csv")
+#View(ma_gdp)
+
+md_gdp <- read_csv("CAGDP1_MD_2001_2024.csv")
+#View(md_gdp)
+
+mi_gdp <- read_csv("CAGDP1_MI_2001_2024.csv")
+#View(mi_gdp)
+
+mn_gdp <- read_csv("CAGDP1_MN_2001_2024.csv")
+#View(mn_gdp)
+
+mo_gdp <- read_csv("CAGDP1_MO_2001_2024.csv")
+#View(mo_gdp)
+
+ms_gdp <- read_csv("CAGDP1_MS_2001_2024.csv")
+#View(ms_gdp)
+
+nc_gdp <- read_csv("CAGDP1_NC_2001_2024.csv")
+#View(nc_gdp)
+
+nh_gdp <- read_csv("CAGDP1_NH_2001_2024.csv")
+#View(nh_gdp)
+
+nj_gdp <- read_csv("CAGDP1_NJ_2001_2024.csv")
+#View(nj_gdp)
+
+nv_gdp <- read_csv("CAGDP1_NV_2001_2024.csv")
+#View(nv_gdp)
+
+ny_gdp <- read_csv("CAGDP1_NY_2001_2024.csv")
+#View(ny_gdp)
+
+oh_gdp <- read_csv("CAGDP1_OH_2001_2024.csv")
+#View(oh_gdp)
+
+ok_gdp <- read_csv("CAGDP1_OK_2001_2024.csv")
+#View(ok_gdp)
+
+or_gdp <- read_csv("CAGDP1_OR_2001_2024.csv")
+#View(or_gdp)
+
+pa_gdp <- read_csv("CAGDP1_PA_2001_2024.csv")
+#View(pa_gdp)
+
+sc_gdp <- read_csv("CAGDP1_SC_2001_2024.csv")
+#View(sc_gdp)
+
+tn_gdp <- read_csv("CAGDP1_TN_2001_2024.csv")
+#View(tn_gdp)
+
+tx_gdp <- read_csv("CAGDP1_TX_2001_2024.csv")
+#View(tx_gdp)
+
+ut_gdp <- read_csv("CAGDP1_UT_2001_2024.csv")
+#View(ut_gdp)
+
+va_gdp <- read_csv("CAGDP1_VA_2001_2024.csv")
+#View(va_gdp)
+
+wa_gdp <- read_csv("CAGDP1_WA_2001_2024.csv")
+#View(wa_gdp)
+
+wi_gdp <- read_csv("CAGDP1_WI_2001_2024.csv")
+#View(wi_gdp)
+
+wv_gdp <- read_csv("CAGDP1_WV_2001_2024.csv")
+#View(wv_gdp)
+
+```
+
+
+```{r}
+# Prepping census data
+# NOTE: DATA WILL NOT INCLUDE ANYTHING FOR TORONTO RAPTORS
+#asked ai to make a list of the nba cities and expantion cities that I proposed, then had to go edit it to the format to match the census data.
+nba_metros <- c(
+  ".Atlanta-Sandy Springs-Roswell, GA Metro Area",
+  ".Boston-Cambridge-Newton, MA-NH Metro Area",
+  ".Charlotte-Concord-Gastonia, NC-SC Metro Area",
+  ".Chicago-Naperville-Elgin, IL-IN Metro Area",
+  ".Cleveland, OH Metro Area",
+  ".Dallas-Fort Worth-Arlington, TX Metro Area",
+  ".Denver-Aurora-Centennial, CO Metro Area",
+  ".Detroit-Warren-Dearborn, MI Metro Area",
+  ".Houston-Pasadena-The Woodlands, TX Metro Area",
+  ".Indianapolis-Carmel-Greenwood, IN Metro Area",
+  ".Los Angeles-Long Beach-Anaheim, CA Metro Area",
+  ".Memphis, TN-MS-AR Metro Area",
+  ".Miami-Fort Lauderdale-West Palm Beach, FL Metro Area",
+  ".Milwaukee-Waukesha, WI Metro Area",
+  ".Minneapolis-St. Paul-Bloomington, MN-WI Metro Area",
+  ".New Orleans-Metairie, LA Metro Area",
+  ".New York-Newark-Jersey City, NY-NJ Metro Area",
+  ".Oklahoma City, OK Metro Area",
+  ".Orlando-Kissimmee-Sanford, FL Metro Area",
+  ".Philadelphia-Camden-Wilmington, PA-NJ-DE-MD Metro Area",
+  ".Phoenix-Mesa-Chandler, AZ Metro Area",
+  ".Portland-Vancouver-Hillsboro, OR-WA Metro Area",
+  ".Sacramento-Roseville-Folsom, CA Metro Area",
+  ".Salt Lake City-Murray, UT Metro Area",
+  ".San Antonio-New Braunfels, TX Metro Area",
+  ".San Francisco-Oakland-Fremont, CA Metro Area",
+  ".Washington-Arlington-Alexandria, DC-VA-MD-WV Metro Area"
+)
+
+expansion_metros <- c(
+  ".Seattle-Tacoma-Bellevue, WA Metro Area",
+  ".Las Vegas-Henderson-North Las Vegas, NV Metro Area",
+  ".Louisville/Jefferson County, KY-IN Metro Area",
+  ".Pittsburgh, PA Metro Area",
+  ".Kansas City, MO-KS Metro Area"
+)
+
+
+
+target_markets <- est_pop |>
+  filter(`Geographic Area` %in% c(nba_metros, expansion_metros)) |> 
+  mutate(pop_growth_5yr = `2025` - `2020`,
+         pop_growth_pct = 100 * (`2025` - `2020`) / `2020`)
+
+check_names <- target_markets |> 
+  select(`Geographic Area`) # got all the names correctly
+
+pop_target <- target_markets |> 
+  select(`Geographic Area`, `2025`, pop_growth_5yr, pop_growth_pct) |> 
+  mutate(market = str_extract(`Geographic Area`, "(?<=\\.).*?(?=[,\\-/])")) # ai made the regex "" part.
+# can now join on market
+
+pop_target <- pop_target |>
+  rename(metro_pop_2025 = `2025`, metro_pop_growth_5yr = pop_growth_5yr, metro_pop_growth_pct = pop_growth_pct)
+
+#adding state so rpp can join easier
+pop_target <- pop_target |>
+  mutate(
+    state = case_when(
+      market == "Atlanta" ~ "Georgia",
+      market == "Boston" ~ "Massachusetts",
+      market == "Charlotte" ~ "North Carolina",
+      market == "Chicago" ~ "Illinois",
+      market == "Cleveland" ~ "Ohio",
+      market == "Dallas" ~ "Texas",
+      market == "Denver" ~ "Colorado",
+      market == "Detroit" ~ "Michigan",
+      market == "Houston" ~ "Texas",
+      market == "Indianapolis" ~ "Indiana",
+      market == "Los Angeles" ~ "California",
+      market == "Memphis" ~ "Tennessee",
+      market == "Miami" ~ "Florida",
+      market == "Milwaukee" ~ "Wisconsin",
+      market == "Minneapolis" ~ "Minnesota",
+      market == "New Orleans" ~ "Louisiana",
+      market == "New York" ~ "New York",
+      market == "Oklahoma City" ~ "Oklahoma",
+      market == "Orlando" ~ "Florida",
+      market == "Philadelphia" ~ "Pennsylvania",
+      market == "Phoenix" ~ "Arizona",
+      market == "Portland" ~ "Oregon",
+      market == "Sacramento" ~ "California",
+      market == "Salt Lake City" ~ "Utah",
+      market == "San Antonio" ~ "Texas",
+      market == "San Francisco" ~ "California",
+      market == "Washington" ~ "District of Columbia",
+      market == "Seattle" ~ "Washington",
+      market == "Las Vegas" ~ "Nevada",
+      market == "Louisville" ~ "Kentucky",
+      market == "Pittsburgh" ~ "Pennsylvania",
+      market == "Kansas City" ~ "Missouri")) # ai made this list to get states
+
+
+
+```
+
+
+```{r}
+# Prepping RPP data
+rpp_states <- c(
+  "Arizona (Metropolitan Portion)",
+  "California (Metropolitan Portion)",
+  "Colorado (Metropolitan Portion)",
+  "District of Columbia (Metropolitan Portion)",
+  "Florida (Metropolitan Portion)",
+  "Georgia (Metropolitan Portion)",
+  "Illinois (Metropolitan Portion)",
+  "Indiana (Metropolitan Portion)",
+  "Kentucky (Metropolitan Portion)",
+  "Louisiana (Metropolitan Portion)",
+  "Massachusetts (Metropolitan Portion)",
+  "Michigan (Metropolitan Portion)",
+  "Minnesota (Metropolitan Portion)",
+  "Missouri (Metropolitan Portion)",
+  "Nevada (Metropolitan Portion)",
+  "New York (Metropolitan Portion)",
+  "North Carolina (Metropolitan Portion)",
+  "Ohio (Metropolitan Portion)",
+  "Oklahoma (Metropolitan Portion)",
+  "Oregon (Metropolitan Portion)",
+  "Pennsylvania (Metropolitan Portion)",
+  "Tennessee (Metropolitan Portion)",
+  "Texas (Metropolitan Portion)",
+  "Utah (Metropolitan Portion)",
+  "Washington (Metropolitan Portion)",
+  "Wisconsin (Metropolitan Portion)"
+)
+
+
+rpp_target <- rpp |>
+  filter(GeoName %in% rpp_states, Description == "RPPs: All items") |> 
+  select(GeoName, `2024`) |>
+  rename(state_metro_rpp_2024 = `2024`) |> 
+  mutate(state = str_remove(GeoName, " \\(Metropolitan Portion\\)$")) |> 
+  select(-c(GeoName))
+
+```
+
+
+```{r}
+#gdp data prepping
+gdp_all <- bind_rows(ar_gdp, az_gdp, ca_gdp, co_gdp, dc_gdp, de_gdp, fl_gdp, ga_gdp, il_gdp, in_gdp, ks_gdp, ky_gdp, la_gdp, ma_gdp, md_gdp, mi_gdp, mn_gdp, mo_gdp, ms_gdp, nc_gdp, nh_gdp, nj_gdp, nv_gdp, ny_gdp, oh_gdp, ok_gdp, or_gdp, pa_gdp, sc_gdp, tn_gdp, tx_gdp, ut_gdp, va_gdp, wa_gdp, wi_gdp, wv_gdp)
+#View(gdp_all)
+
+
+# ai made this list, I was struggling to find out the counties to use, and by county was all I could find for gdp other than state.
+county_lists <- list(
+  "Atlanta" = c(
+    "Barrow, GA",
+    "Bartow, GA",
+    "Butts, GA",
+    "Carroll, GA",
+    "Cherokee, GA",
+    "Clayton, GA",
+    "Cobb, GA",
+    "Coweta, GA",
+    "Dawson, GA",
+    "DeKalb, GA",
+    "Douglas, GA",
+    "Fayette, GA",
+    "Forsyth, GA",
+    "Fulton, GA",
+    "Gwinnett, GA",
+    "Haralson, GA",
+    "Heard, GA",
+    "Henry, GA",
+    "Jasper, GA",
+    "Lumpkin, GA",
+    "Meriwether, GA",
+    "Morgan, GA",
+    "Newton, GA",
+    "Paulding, GA",
+    "Pickens, GA",
+    "Pike, GA",
+    "Rockdale, GA",
+    "Spalding, GA",
+    "Walton, GA"
+  ),
+  "Boston" = c(
+    "Essex, MA",
+    "Middlesex, MA",
+    "Norfolk, MA",
+    "Plymouth, MA",
+    "Rockingham, NH",
+    "Strafford, NH",
+    "Suffolk, MA"
+  ),
+  "Charlotte" = c(
+    "Anson, NC",
+    "Cabarrus, NC",
+    "Chester, SC",
+    "Gaston, NC",
+    "Iredell, NC",
+    "Lancaster, SC",
+    "Lincoln, NC",
+    "Mecklenburg, NC",
+    "Rowan, NC",
+    "Union, NC",
+    "York, SC"
+  ),
+  "Chicago" = c(
+    "Cook, IL",
+    "DeKalb, IL",
+    "DuPage, IL",
+    "Grundy, IL",
+    "Jasper, IN",
+    "Kane, IL",
+    "Kendall, IL",
+    "Lake, IL",
+    "Lake, IN",
+    "McHenry, IL",
+    "Newton, IN",
+    "Porter, IN",
+    "Will, IL"
+  ),
+  "Cleveland" = c(
+    "Ashtabula, OH",
+    "Cuyahoga, OH",
+    "Geauga, OH",
+    "Lake, OH",
+    "Lorain, OH",
+    "Medina, OH"
+  ),
+  "Dallas" = c(
+    "Collin, TX",
+    "Dallas, TX",
+    "Denton, TX",
+    "Ellis, TX",
+    "Hunt, TX",
+    "Johnson, TX",
+    "Kaufman, TX",
+    "Parker, TX",
+    "Rockwall, TX",
+    "Tarrant, TX",
+    "Wise, TX"
+  ),
+  "Denver" = c(
+    "Adams, CO",
+    "Arapahoe, CO",
+    "Broomfield, CO",
+    "Clear Creek, CO",
+    "Denver, CO",
+    "Douglas, CO",
+    "Elbert, CO",
+    "Gilpin, CO",
+    "Jefferson, CO",
+    "Park, CO"
+  ),
+  "Detroit" = c(
+    "Lapeer, MI",
+    "Livingston, MI",
+    "Macomb, MI",
+    "Oakland, MI",
+    "St. Clair, MI",
+    "Wayne, MI"
+  ),
+  "Houston" = c(
+    "Austin, TX",
+    "Brazoria, TX",
+    "Chambers, TX",
+    "Fort Bend, TX",
+    "Galveston, TX",
+    "Harris, TX",
+    "Liberty, TX",
+    "Montgomery, TX",
+    "San Jacinto, TX",
+    "Waller, TX"
+  ),
+  "Indianapolis" = c(
+    "Boone, IN",
+    "Brown, IN",
+    "Hamilton, IN",
+    "Hancock, IN",
+    "Hendricks, IN",
+    "Johnson, IN",
+    "Madison, IN",
+    "Marion, IN",
+    "Morgan, IN",
+    "Shelby, IN",
+    "Tipton, IN"
+  ),
+  "Los Angeles" = c(
+    "Los Angeles, CA",
+    "Orange, CA"
+  ),
+  "Memphis" = c(
+    "Benton, MS",
+    "Crittenden, AR",
+    "DeSoto, MS",
+    "Fayette, TN",
+    "Marshall, MS",
+    "Shelby, TN",
+    "Tate, MS",
+    "Tipton, TN",
+    "Tunica, MS"
+  ),
+  "Miami" = c(
+    "Broward, FL",
+    "Miami-Dade, FL",
+    "Palm Beach, FL"
+  ),
+  "Milwaukee" = c(
+    "Milwaukee, WI",
+    "Ozaukee, WI",
+    "Washington, WI",
+    "Waukesha, WI"
+  ),
+  "Minneapolis" = c(
+    "Anoka, MN",
+    "Carver, MN",
+    "Chisago, MN",
+    "Dakota, MN",
+    "Hennepin, MN",
+    "Isanti, MN",
+    "Le Sueur, MN",
+    "Mille Lacs, MN",
+    "Pierce, WI",
+    "Ramsey, MN",
+    "Scott, MN",
+    "Sherburne, MN",
+    "St. Croix, WI",
+    "Washington, MN",
+    "Wright, MN"
+  ),
+  "New Orleans" = c(
+    "Jefferson, LA",
+    "Orleans, LA",
+    "Plaquemines, LA",
+    "St. Bernard, LA",
+    "St. Charles, LA",
+    "St. James, LA",
+    "St. John the Baptist, LA"
+  ),
+  "New York" = c(
+    "Bergen, NJ",
+    "Bronx, NY",
+    "Essex, NJ",
+    "Hudson, NJ",
+    "Hunterdon, NJ",
+    "Kings, NY",
+    "Middlesex, NJ",
+    "Monmouth, NJ",
+    "Morris, NJ",
+    "Nassau, NY",
+    "New York, NY",
+    "Ocean, NJ",
+    "Passaic, NJ",
+    "Putnam, NY",
+    "Queens, NY",
+    "Richmond, NY",
+    "Rockland, NY",
+    "Somerset, NJ",
+    "Suffolk, NY",
+    "Sussex, NJ",
+    "Union, NJ",
+    "Westchester, NY"
+  ),
+  "Oklahoma City" = c(
+    "Canadian, OK",
+    "Cleveland, OK",
+    "Grady, OK",
+    "Lincoln, OK",
+    "Logan, OK",
+    "McClain, OK",
+    "Oklahoma, OK"
+  ),
+  "Orlando" = c(
+    "Lake, FL",
+    "Orange, FL",
+    "Osceola, FL",
+    "Seminole, FL"
+  ),
+  "Philadelphia" = c(
+    "Bucks, PA",
+    "Burlington, NJ",
+    "Camden, NJ",
+    "Cecil, MD",
+    "Chester, PA",
+    "Delaware, PA",
+    "Gloucester, NJ",
+    "Montgomery, PA",
+    "New Castle, DE",
+    "Philadelphia, PA",
+    "Salem, NJ"
+  ),
+  "Phoenix" = c(
+    "Maricopa, AZ",
+    "Pinal, AZ"
+  ),
+  "Portland" = c(
+    "Clackamas, OR",
+    "Clark, WA",
+    "Columbia, OR",
+    "Multnomah, OR",
+    "Skamania, WA",
+    "Washington, OR",
+    "Yamhill, OR"
+  ),
+  "Sacramento" = c(
+    "El Dorado, CA",
+    "Placer, CA",
+    "Sacramento, CA",
+    "Yolo, CA"
+  ),
+  "Salt Lake City" = c(
+    "Salt Lake, UT",
+    "Tooele, UT"
+  ),
+  "San Antonio" = c(
+    "Atascosa, TX",
+    "Bandera, TX",
+    "Bexar, TX",
+    "Comal, TX",
+    "Guadalupe, TX",
+    "Kendall, TX",
+    "Medina, TX",
+    "Wilson, TX"
+  ),
+  "San Francisco" = c(
+    "Alameda, CA",
+    "Contra Costa, CA",
+    "Marin, CA",
+    "San Francisco, CA",
+    "San Mateo, CA"
+  ),
+  "Washington" = c(
+    "Alexandria city, VA",
+    "Arlington, VA",
+    "Charles, MD",
+    "Clarke, VA",
+    "Culpeper, VA",
+    "District of Columbia, DC",
+    "Fairfax city, VA",
+    "Fairfax, VA",
+    "Falls Church city, VA",
+    "Fauquier, VA",
+    "Frederick, MD",
+    "Fredericksburg city, VA",
+    "Jefferson, WV",
+    "Loudoun, VA",
+    "Manassas Park city, VA",
+    "Manassas city, VA",
+    "Montgomery, MD",
+    "Prince George's, MD",
+    "Prince William, VA",
+    "Rappahannock, VA",
+    "Spotsylvania, VA",
+    "Stafford, VA",
+    "Warren, VA"
+  ),
+  "Seattle" = c(
+    "King, WA",
+    "Pierce, WA",
+    "Snohomish, WA"
+  ),
+  "Las Vegas" = c(
+    "Clark, NV"
+  ),
+  "Louisville" = c(
+    "Bullitt, KY",
+    "Clark, IN",
+    "Floyd, IN",
+    "Harrison, IN",
+    "Henry, KY",
+    "Jefferson, KY",
+    "Meade, KY",
+    "Nelson, KY",
+    "Oldham, KY",
+    "Shelby, KY",
+    "Spencer, KY",
+    "Washington, IN"
+  ),
+  "Pittsburgh" = c(
+    "Allegheny, PA",
+    "Armstrong, PA",
+    "Beaver, PA",
+    "Butler, PA",
+    "Fayette, PA",
+    "Lawrence, PA",
+    "Washington, PA",
+    "Westmoreland, PA"
+  ),
+  "Kansas City" = c(
+    "Bates, MO",
+    "Caldwell, MO",
+    "Cass, MO",
+    "Clay, MO",
+    "Clinton, MO",
+    "Jackson, MO",
+    "Johnson, KS",
+    "Lafayette, MO",
+    "Leavenworth, KS",
+    "Linn, KS",
+    "Miami, KS",
+    "Platte, MO",
+    "Ray, MO",
+    "Wyandotte, KS"
+  )
+)
+
+target_counties <- unlist(county_lists, use.names = FALSE)
+
+gdp_target <- gdp_all |>
+  filter(GeoName %in% target_counties, LineCode == 3) |> 
+  select(GeoName, `2024`) |>
+  mutate(
+    GeoName = str_squish(GeoName),
+    GeoName = case_when(
+      GeoName == "Alexandria City, VA" ~ "Alexandria city, VA",
+      GeoName == "Fairfax, Fairfax City + Falls Church, VA" ~ "Fairfax_combined, VA",
+      GeoName == "Prince William, Manassas + Manassas Park, VA" ~ "PrinceWilliam_combined, VA",
+      GeoName == "Spotsylvania + Fredericksburg, VA" ~ "Spotsylvania_combined, VA",
+      TRUE ~ GeoName)) |> #AI made this mutate, i was confused why some counties were not working, also made the join to keep these counties
+  
+  # join to a county -> market lookup made from county_lists
+  left_join(
+    enframe(county_lists, name = "market", value = "GeoName") |>
+      unnest_longer(GeoName) |>
+      mutate(
+        GeoName = case_when(
+          GeoName %in% c("Fairfax, VA", "Fairfax city, VA", "Falls Church city, VA") ~ "Fairfax_combined, VA",
+          GeoName %in% c("Prince William, VA", "Manassas city, VA", "Manassas Park city, VA") ~ "PrinceWilliam_combined, VA",
+          GeoName %in% c("Spotsylvania, VA", "Fredericksburg city, VA") ~ "Spotsylvania_combined, VA",
+          TRUE ~ GeoName)) |>
+      distinct(),
+    by = "GeoName") |>
+  drop_na(market) |>
+  group_by(market) |>
+  summarise(
+    metro_gdp_2024 = sum(`2024`), .groups = "drop") |>
+  arrange(desc(metro_gdp_2024))
+
+
+
+
+```
+
+
+```{r}
+#joining the market datasets into 1
+markets <- pop_target |> 
+  left_join(gdp_target, by = "market")|>
+  left_join(rpp_target, by = "state")
+  
+markets <- markets[c("market", "state", "Geographic Area", "metro_gdp_2024", "state_metro_rpp_2024", "metro_pop_2025", "metro_pop_growth_5yr", "metro_pop_growth_pct")] #making it cleaner to look at for myself
+
+marketsb <- markets |> 
+  filter(`Geographic Area` %in% expansion_metros) #just expansion teams
+
+best_prospects <- c("Seattle", "Las Vegas")
+other_prospects <- c("Pittsburgh", "Kansas City", "Louisville")
+
+markets <- markets |>
+  mutate(
+    market_type = case_when(
+      market %in% best_prospects ~ "Primary prospect",
+      market %in% other_prospects ~ "Other prospect",
+      TRUE ~ "Existing NBA market"
+    )
+  )
+```
+
+# Results
+
+We will start by comparing the proposed expansion areas, then later compare those proposed areas with the rest of the league.
+
+## Possible Expansion Areas
+
+We will first look at the proposed expansion areas, which were Seattle, Washington; Las Vegas, Nevada; Pittsburgh, Pennsylvania; Kansas City, Missouri; and Louisville, Kentucky. We will first look at the population data.
+
+```{r, fig.width=10, fig.height=6}
+ggplot(marketsb, aes(y = reorder(market, metro_pop_2025), x = metro_pop_2025)) +
+  geom_col(fill = "cadetblue4") +
+  geom_text(aes(label = paste0(round(metro_pop_growth_pct, 1), "% Growth")),
+    hjust = 1.1,
+    size = 3.5) +
+  scale_x_continuous(
+    labels = label_comma(),
+    expand = expansion(mult = c(0, 0.02))) +
+  labs(title = "Possible NBA Expansion Locations by Population",
+       subtitle = "With % growth of 2020 to 2025\n(Census Data)",
+       y = NULL,
+       x = "Estimated Metro Population 2025"
+       ) +
+  theme_clean() +
+  theme(panel.grid.minor.x = element_line(color = "grey", linewidth = .5, linetype = "dotted"))
+```
+
+Looking at the estimated population from the Census data, the Seattle area is the clear leader in population and in the middle of the pack for growth over the last 5 years. When deciding a second best option, Las Vegas and Pittsburgh are very close in population, however Las Vegas has the highest growth percentage while Pittsburgh has the lowest. Louisville has a clear separation, but as the smallest among these areas.
+
+We will next look at the GDP, and evaluate the sizes of the existing markets in these areas.
+
+```{r, fig.width=10, fig.height=6}
+ggplot(marketsb, aes(y = reorder(market, metro_gdp_2024), x = metro_gdp_2024)) +
+  geom_col(fill = "cadetblue4") +
+  scale_x_continuous(labels = label_dollar(scale = 1e-6, suffix = "M")) +
+  labs(title = "Possible NBA Expansion Locations by 2024 GDP",
+       subtitle = "Metro areas calculated by summing counties data\n(BEA Data)",
+       y = NULL,
+       x = "Metro GDP 2024 (Current Dollar)"
+       ) +
+  theme_clean() +
+  theme(panel.grid.minor.x = element_line(color = "grey", linewidth = .5, linetype = "dotted"))
+```
+
+From this graph we see the same 3 groups, Seattle ahead of the other by a lot, and Louisville behind the others by a clear margin. The GDP helps us see the size of the market, and we can clearly see that Seattle has the largest existing market among these areas.
+
+
+We will next look at the RPP. To interpret compare the value to 100. Above 100 indicates higher costs, and below 100 indicates lower costs.
+
+```{r, fig.width=10, fig.height=6}
+ggplot(marketsb, aes(y = reorder(market, state_metro_rpp_2024), x = state_metro_rpp_2024)) +
+  geom_col(fill = "cadetblue4") +
+  geom_vline(xintercept = 100, color = "coral4") +
+  annotate("text", x = 100, y = 6, label = "U.S. average = 100", vjust = -1, hjust = .5, color = "coral4",  size = 3) +
+  labs(title = "Possible NBA Expansion Locations by 2024 RPP",
+       subtitle = "Vertical Line at 100 RPP\n(BEA Data)",
+       y = NULL,
+       x = "Metro RPP by State"
+       ) +
+  theme_clean() +
+  coord_cartesian(clip = "off") +
+  theme(panel.grid.minor.x = element_line(color = "grey", linewidth = .5, linetype = "dotted"),
+        plot.margin = margin(10, 20, 20, 10))
+```
+
+From this graph we can see that Seattle and Las Vegas are over 100, the US average, and the rest are below. For areas with RPP above 100 they would have higher operating costs, but also may be more supported for larger scale operations, such as an NBA team. For areas with a RPP below 100, there would be less operating costs, but also a less expensive market condition. This RPP interpretation is relative to the rest of the US, so its interpretation should be more accompanied with other data, such as population and gdp. Which we will do in the conclusion of this section.
+
+
+### Best Possible Expansion Areas
+
+The clear take away so far is that if there is 1 team added to the NBA, it should be based in the Seattle, Washington area. The size of the population and market surpass the others, and the higher RPP could benefit the higher scale of an NBA team. If there were to be 2 teams added, the second area seems to be a choice among Las Vegas and Pittsburgh and Kansas City, since Louisville trailed behind. While Kansas City was also behind, it was much closer, at least enough to continue to be evaluated by more metrics before a decision is made. From these stats, Las Vegas would be my personal choice before looking at more data. It has very close population to Pittsburgh, and has high recent population growth. It also has higher RPP, which would benefit more from the scale of an NBA team.
+
+
+From the data so far, the best 2 options appear to be Seattle, Washington and Las Vegas, Nevada. Which is not too surprising considering these were the two places named specifically when the NBA announced the exploration for possible expansion. Next, we will look at the same data, but focus more on comparing these markets, to the markets of areas with existing NBA teams.
+
+## Comparing to Areas with Existing NBA Teams
+
+Now to compare the markets we have been reviewing with the markets of areas with existing NBA teams. Note that there will not be data for the Toronto Raptors, as they are not in the US and not available in the same avenue of where I got the data used in this case study. Also, note that the RPP being by state will be more apparent when comparing areas with NBA teams, as states such as California and Texas have multiple teams, but will have the same RPP data.
+
+We will again first look at the estimated populations.
+
+```{r, fig.width=8, fig.height=8}
+ggplot(markets, aes(y=reorder(market, metro_pop_2025), x=metro_pop_2025, fill = market_type)) +
+  geom_col(width = .9) +
+  scale_fill_manual(values = c(
+    "Existing NBA market" = "#c8102e",
+    "Primary prospect" = "cadetblue4",
+    "Other prospect" = "goldenrod2"
+  )) +
+  geom_text(aes(label = paste0(round(metro_pop_growth_pct, 1), "% Growth")),
+    hjust = 1.1,
+    size = 3.5) +
+  scale_x_sqrt(
+    labels = label_number(scale = 1e-6, suffix = "M"),
+    breaks = c(1e6, 2e6, 3e6, 5e6, 7.5e6, 10e6, 15e6, 20e6),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  labs(title = "Possible NBA Expansion Locations by Population",
+       subtitle = "With % growth of 2020 to 2025\n(Census Data)",
+       y = NULL,
+       x = "Estimated Metro Population 2025",
+       fill = NULL
+       ) +
+  theme_clean() +
+  theme(panel.grid.minor.x = element_line(color = "grey", linewidth = .5, linetype = "dotted"),
+    legend.position = c(.78, .18), # AI helped me move the legend into the plot, I just messed with the numbers
+    legend.background = element_rect(fill = alpha("snow", 0.8), color = "black"),
+    legend.key.size = unit(0.35, "in"))
+```
+
+We see again that the Pittsburgh, Las Vegas, and Kansas City group is so close to each other, and that Seattle is much higher than any other prospect area. Comparing them to the areas with existing NBA teams, only Seattle is in the upper half of the areas. Lets look at the GDP and RPP next.
+
+```{r, fig.width=4, fig.height=8}
+# trying patchwork to show next 2 graphs side by side.
+p1 <- ggplot(markets, aes(y = reorder(market, metro_gdp_2024), x = metro_gdp_2024, fill = market_type)) +
+  geom_col() +
+  scale_fill_manual(values = c(
+    "Existing NBA market" = "#c8102e",
+    "Primary prospect" = "cadetblue4",
+    "Other prospect" = "goldenrod2"
+  )) +
+  scale_x_continuous(labels = label_dollar(scale = 1e-6, suffix = "M")) +
+  labs(title = "Possible NBA Expansion Locations by 2024 GDP",
+       subtitle = "Metro areas calculated by summing counties data\n(BEA Data)",
+       y = NULL,
+       x = "Metro GDP 2024 (Current Dollar)",
+       fill = NULL
+       ) +
+  theme_clean() +
+  theme(panel.grid.minor.x = element_line(color = "grey", linewidth = .5, linetype = "dotted"),
+    legend.position = c(.78, .18),
+    legend.background = element_rect(fill = alpha("snow", 0.8), color = "black"),
+    legend.key.size = unit(.35, "in"))
+```
+
+```{r, fig.width=4, fig.height=8}
+p2 <- ggplot(markets, aes(y = reorder(market, state_metro_rpp_2024), x = state_metro_rpp_2024, fill = market_type)) +
+  geom_col() +
+  scale_fill_manual(values = c(
+    "Existing NBA market" = "#c8102e",
+    "Primary prospect" = "cadetblue4",
+    "Other prospect" = "goldenrod2"
+  )) +
+  geom_vline(xintercept = 100, color = "coral4") +
+  annotate("text", x = 100, y = 33, label = "U.S. average = 100", vjust = -.5, hjust = .5, color = "coral4",  size = 3.5) +
+  labs(title = "Possible NBA Expansion Locations by 2024 RPP",
+       subtitle = "Vertical Line at 100 RPP\n(BEA Data)",
+       y = NULL,
+       x = "Metro RPP by State"
+       ) +
+  theme_clean() +
+  coord_cartesian(clip = "off") +
+  theme(panel.grid.minor.x = element_line(color = "grey", linewidth = .5, linetype = "dotted"),
+        plot.margin = margin(10, 20, 20, 10),
+        legend.position = "none")
+```
+
+```{r, fig.width=14, fig.height=8}
+grid.arrange(p1, p2, ncol = 2)
+```
+
+
+Reminder, Los Angeles is supporting 2 teams, and New York is supporting 2 teams, and the Toronto Raptors are not represented in any graphs. From these graphs we can see the Seattle market would rank among the larger markets in all the NBA, and others would be in the middle or lower markets of the NBA. However none of the prospects are low enough to make me think they are completely eliminated for the future, whether expansion teams or existing franchises moving. 
+
+# Conclusion
+
+After diving into some of the statistics of the markets of areas with NBA teams, and potential areas for NBA teams, my main take away is that I would be shocked if the NBA expanded, and Seattle, Washington did not get a team. The market is great and a history of a team exists there already with the Seattle Supersonics. From the stats we looked at here, the second most likely to me would be Las Vegas. These top 2 make sense as they were the 2 named specifically when the NBA made their statement of exploring the possibility of expansion. I am looking forward to the end of 2026, when an update from the NBA is expected related to the exploration of expansion opportunities.
+Things that could be done to improve upon this case study would be to first include data if possible for places like Vancouver, Canada and Mexico City, Mexico, as well as to include other meaningful data such as T.V. market size for example.
+
+
+### References
+
+Data used for this case study were found from links below
+
+[Census Data](https://www.census.gov/data/tables/time-series/demo/popest/2020s-total-metro-and-micro-statistical-areas.html)
+
+
+[BEA GDP Data](https://apps.bea.gov/itable/?ReqID=70&step=1&_gl=1*k02j6y*_ga*MTYxODUxNjgwOC4xNzc1MTAxMzQ2*_ga_J4698JNNFT*czE3NzUxMDk5MDUkbzMkZzEkdDE3NzUxMTA0NjIkajUzJGwwJGgw#eyJhcHBpZCI6NzAsInN0ZXBzIjpbMSwyOSwyNSwzMSwyNiwyNywzMF0sImRhdGEiOltbIlRhYmxlSWQiLCI1MzMiXSxbIk1ham9yX0FyZWEiLCI0Il0sWyJTdGF0ZSIsWyJYWCJdXSxbIkFyZWEiLFsiWFgiXV0sWyJTdGF0aXN0aWMiLFsiLTEiXV0sWyJVbml0X29mX21lYXN1cmUiLCJMZXZlbHMiXSxbIlllYXIiLFsiMjAyNCIsIjIwMjMiLCIyMDIyIiwiMjAyMSIsIjIwMjAiXV0sWyJZZWFyQmVnaW4iLCItMSJdLFsiWWVhcl9FbmQiLCItMSJdXX0=)
+
+
+[BEA RPP Data](https://apps.bea.gov/itable/?ReqID=70&step=1&_gl=1*b9x6ae*_ga*MTYxODUxNjgwOC4xNzc1MTAxMzQ2*_ga_J4698JNNFT*czE3NzUxMDEzNDUkbzEkZzAkdDE3NzUxMDEzNDUkajYwJGwwJGgw#eyJhcHBpZCI6NzAsInN0ZXBzIjpbMSwyOSwyNSwzMSwyNiwyNywzMF0sImRhdGEiOltbIlRhYmxlSWQiLCI2MDAiXSxbIk1ham9yX0FyZWEiLCIwIl0sWyJTdGF0ZSIsWyIwIl1dLFsiQXJlYSIsWyIwMTAwMCIsIjAyMDAwIiwiMDQwMDAiLCIwNTAwMCIsIjA2MDAwIiwiMDgwMDAiLCIwOTAwMCIsIjEwMDAwIiwiMTEwMDAiLCIxMjAwMCIsIjEzMDAwIiwiMTUwMDAiLCIxNjAwMCIsIjE3MDAwIiwiMTgwMDAiLCIxOTAwMCIsIjIwMDAwIiwiMjEwMDAiLCIyMjAwMCIsIjIzMDAwIiwiMjQwMDAiLCIyNTAwMCIsIjI2MDAwIiwiMjcwMDAiLCIyODAwMCIsIjI5MDAwIiwiMzAwMDAiLCIzMTAwMCIsIjMyMDAwIiwiMzMwMDAiLCIzNDAwMCIsIjM1MDAwIiwiMzYwMDAiLCIzNzAwMCIsIjM4MDAwIiwiMzkwMDAiLCI0MDAwMCIsIjQxMDAwIiwiNDIwMDAiLCI0NDAwMCIsIjQ1MDAwIiwiNDYwMDAiLCI0NzAwMCIsIjQ4MDAwIiwiNDkwMDAiLCI1MDAwMCIsIjUxMDAwIiwiNTMwMDAiLCI1NDAwMCIsIjU1MDAwIiwiNTYwMDAiXV0sWyJTdGF0aXN0aWMiLFsiMTMiXV0sWyJVbml0X29mX21lYXN1cmUiLCJMZXZlbHMiXSxbIlllYXIiLFsiMjAyNCIsIjIwMjMiLCIyMDIyIiwiMjAyMSIsIjIwMjAiXV0sWyJZZWFyQmVnaW4iLCItMSJdLFsiWWVhcl9FbmQiLCItMSJdXX0=)
+
+

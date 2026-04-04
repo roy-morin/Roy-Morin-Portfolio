@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - [Basketball Archeatype Recognition]"
+subtitle: "Course CS 450"
+author: "[Roy Morin]"
 format:
   html:
     self-contained: true
@@ -24,5 +24,32 @@ execute:
   warning: false
     
 ---
+```{r}
+library(arrow)
+library(dplyr)
+```
 
 ### Paste in a template
+
+
+
+# scratch work
+
+```{r}
+# need to find file location
+#nba <- read_parquet("nba_player_stats_2024_25.parquet")
+
+#glimpse(nba)
+#nba %>%
+#  select(PLAYER_NAME, TEAM_ABBREVIATION, contains("PTS"), contains("AST")) %>%
+#  head()
+```
+
+
+```{r}
+getwd()
+file.exists("nba_player_stats_2024_25.parquet")
+list.files()
+```
+
+

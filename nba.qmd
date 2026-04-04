@@ -1,0 +1,17 @@
+---
+title: "My NBA Projects"
+subtitle: "Exploring The World of the NBA"
+# use quarto markdown to 
+---
+
+# My Interest in the NBA
+
+The NBA has always been my favorite league to follow. I love to play basketball, and that is mainly driven by my love to watch basketball. I remember in high school, when I had a consistent schedule of checking nba stats between classes. My favorite team being the Utah Jazz, I specifically remember in high school when the Jazz were an extremely competitive team built around Donovan Mitchell and Rudy Gobert, and between my first 2 classes, I would always check the nba.com articles about the MVP race, to see where the Jazz players ranked.
+
+
+## My NBA GOAT
+
+When my interest in Data Science grew during college, I loved to explore nba stat websites and look at all the creative ways they showed stats. Early in college I took a class where I made a presentation on who I thought the greatest basketball player of all time was. Before this though, I had never really thought or cared about who it was, I obviously thought through observation it was Lebron James, but through legacy it was Michael Jordan, so I took this opprotunity to dive into stats and make my own choice.
+
+One thing that surprised even me, is I ended up picking a player that tends to get left out of these GOAT conversations. I was astounded by the stats, and records that this player held, and shocked he was not in more conversations. The answer I found was that either his basketball resume was just too unbelievable to believe too much in, or a downplay of his accomplishments due to his competition. But I do still believe to this day, that Wilt Chamberlain is the greatest of all time, when it comes to the GOAT debate in the NBA.
+
