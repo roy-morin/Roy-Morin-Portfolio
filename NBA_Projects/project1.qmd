@@ -30,9 +30,11 @@ execute:
 pacman::p_load(tidyverse, stringr, stringi, rio, pander, hoopR, readxl, janitor, purrr, ggthemes, scales, patchwork, gridExtra)
 ```
 
+
+
 # Intro
 
-The purpose of this case study is to look into the potential expansion of the NBA. The NBA has recently decided to formally explore expansion teams, specifically naming Seattle and Las Vegas. While there is no current confirmation if there will be an expansion or not, and if there is if it will be in Seattle or Las Vegas or somewhere else, the formal statement declaring opportunity is reason enough to take a deeper look. Note that data on Toronto, Canada for the Raptors will not be included, and potential options for expansion locations include Vancouver, Canada and Mexico City, Mexico, but we will not discuss their viability in this study. The expansion locations that will be included here are Seattle, Washington and Las Vegas, Nevada as the specifically mentioned locations, as well as Pittsburgh, Pennsylvania; Kansas City, Missouri; and Louisville, Kentucky as other potential expansion locations.
+The purpose of this case study is to look into the [potential expansion of the NBA](https://www.nba.com/news/nba-board-of-governors-exploration-seattle-las-vegas-expansion). The NBA has recently decided to formally explore expansion teams, specifically naming Seattle and Las Vegas. While there is no current confirmation if there will be an expansion or not, and if there is if it will be in Seattle or Las Vegas or somewhere else, the formal statement declaring opportunity is reason enough to take a deeper look. Note that data on Toronto, Canada for the Raptors will not be included, and potential options for expansion locations include Vancouver, Canada and Mexico City, Mexico, but we will not discuss their viability in this study. The expansion locations that will be included here are Seattle, Washington and Las Vegas, Nevada as the specifically mentioned locations, as well as Pittsburgh, Pennsylvania; Kansas City, Missouri; and Louisville, Kentucky as other potential expansion locations.
 
 ## Data Explanation
 

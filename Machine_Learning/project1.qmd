@@ -47,9 +47,7 @@ library(dplyr)
 
 
 ```{r}
-getwd()
-file.exists("nba_player_stats_2024_25.parquet")
-list.files()
+
 ```
 
 

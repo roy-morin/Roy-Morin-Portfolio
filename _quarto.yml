@@ -51,7 +51,7 @@ website:
         - text: "NBA Expansion Case Study"
           file: NBA_Projects/project1.qmd
         - text: "---"
-        - text: "Project 2"
+        - text: "All NBA Teams Prediction"
           file: NBA_Projects/project2.qmd
         - text: "---"
         - text: "Project 3"

@@ -1,11 +1,14 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Logistic Regression - [Predicting 2025-26 NBA Season All NBA Teams]"
+subtitle: "Course MATH 425 - Semester Project"
+author: "[Roy Morin]"
+date: "4/4/2026"
 format:
   html:
     self-contained: true
     page-layout: full
+    lightbox: true # added myself
+    fig-align: center # added myself, doesn't seem to work
     title-block-banner: true
     toc: true
     toc-depth: 3
@@ -25,4 +28,634 @@ execute:
     
 ---
 
-### Paste in a template
+
+```{r, include=FALSE}
+#| warning: false
+#| message: false
+# libraries
+pacman::p_load(tidyverse, stringr, stringi, rio, pander, hoopR, readxl, janitor, purrr, ggthemes, scales, patchwork, gridExtra, Applr)
+
+nba_current <- read_csv("nba_2025-26_player_data.csv")
+#View(nba_current)
+```
+
+```{r}
+player_data <- hoopR::load_nba_player_box(seasons = 2015:2024)
+
+season_stats <- player_data %>%
+  group_by(athlete_id, athlete_display_name, season) %>%
+  summarize(
+    games_played = n(),
+    
+    avg_pts = mean(field_goals_made * 2 + three_point_field_goals_made + free_throws_made, na.rm = TRUE),
+    avg_reb = mean(offensive_rebounds + defensive_rebounds, na.rm = TRUE),
+    avg_ast = mean(assists, na.rm = TRUE),
+    avg_stl = mean(steals, na.rm = TRUE),
+    avg_blk = mean(blocks, na.rm = TRUE),
+    avg_tov = mean(turnovers, na.rm = TRUE),
+    avg_pf  = mean(fouls, na.rm = TRUE),
+    avg_min  = mean(minutes, na.rm = TRUE),
+    avg_fgm = mean(field_goals_made, na.rm = TRUE),
+    avg_fga = mean(field_goals_attempted, na.rm = TRUE),
+    avg_fg3m = mean(three_point_field_goals_made, na.rm = TRUE),
+    avg_fg3a = mean(three_point_field_goals_attempted, na.rm = TRUE),
+    avg_ftm = mean(free_throws_made, na.rm = TRUE),
+    avg_fta = mean(free_throws_attempted, na.rm = TRUE),
+    fg_pct = sum(field_goals_made, na.rm = TRUE) / sum(field_goals_attempted, na.rm = TRUE),
+    fg3_pct = sum(three_point_field_goals_made, na.rm = TRUE) / sum(three_point_field_goals_attempted, na.rm = TRUE),
+    ft_pct = sum(free_throws_made, na.rm = TRUE) / sum(free_throws_attempted, na.rm = TRUE),
+    .groups = "drop"
+  ) 
+
+```
+
+```{r}
+# stats attempt 2
+
+stats_2015 <- nba_leaguedashplayerstats(
+  season = "2015-16",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2016 <- nba_leaguedashplayerstats(
+  season = "2016-17",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2017 <- nba_leaguedashplayerstats(
+  season = "2017-18",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2018 <- nba_leaguedashplayerstats(
+  season = "2018-19",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2020 <- nba_leaguedashplayerstats(
+  season = "2020-21",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2021 <- nba_leaguedashplayerstats(
+  season = "2021-22",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2022 <- nba_leaguedashplayerstats(
+  season = "2022-23",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2023 <- nba_leaguedashplayerstats(
+  season = "2023-24",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+stats_2024 <- nba_leaguedashplayerstats(
+  season = "2024-25",
+  season_type = "Regular Season",
+  per_mode = "PerGame",
+  measure_type = "Base"
+)$LeagueDashPlayerStats
+
+
+season_stats1 <- bind_rows(
+  stats_2015 %>% mutate(season = 2015),
+  stats_2016 %>% mutate(season = 2016),
+  stats_2017 %>% mutate(season = 2017),
+  stats_2018 %>% mutate(season = 2018),
+  stats_2020 %>% mutate(season = 2020),
+  stats_2021 %>% mutate(season = 2021),
+  stats_2022 %>% mutate(season = 2022),
+  stats_2023 %>% mutate(season = 2023),
+  stats_2024 %>% mutate(season = 2024)
+)
+
+season_stats <- season_stats1 |> 
+  mutate(PLAYER_ID = as.integer(PLAYER_ID),
+    GP = as.numeric(GP),
+    MIN = as.numeric(MIN),
+    PTS = as.numeric(PTS),
+    AST = as.numeric(AST),
+    REB = as.numeric(REB),
+    FGA = as.numeric(FGA),
+    FGM = as.numeric(FGM),
+    FG3A = as.numeric(FG3A),
+    FTA = as.numeric(FTA),
+    STL = as.numeric(STL),
+    BLK = as.numeric(BLK),
+    TOV = as.numeric(TOV),
+    FG_PCT = as.numeric(FG_PCT),
+    FT_PCT = as.numeric(FT_PCT),
+    DD2 = as.numeric(DD2)
+  ) |> 
+  filter(GP > 64, PTS >= 10)
+
+```
+
+```{r}
+# ai helped to make awards to join
+
+all_nba_data <- tibble::tribble(
+  ~season, ~PLAYER_NAME, ~all_nba_team, ~all_nba,
+  2015, "LeBron James", "First Team", 1,
+  2015, "Kawhi Leonard", "First Team", 1,
+  2015, "DeAndre Jordan", "First Team", 1,
+  2015, "Stephen Curry", "First Team", 1,
+  2015, "Russell Westbrook", "First Team", 1,
+  2015, "Kevin Durant", "Second Team", 1,
+  2015, "Draymond Green", "Second Team", 1,
+  2015, "DeMarcus Cousins", "Second Team", 1,
+  2015, "Chris Paul", "Second Team", 1,
+  2015, "Damian Lillard", "Second Team", 1,
+  2015, "Paul George", "Third Team", 1,
+  2015, "LaMarcus Aldridge", "Third Team", 1,
+  2015, "Andre Drummond", "Third Team", 1,
+  2015, "Klay Thompson", "Third Team", 1,
+  2015, "Kyle Lowry", "Third Team", 1,
+
+  2016, "LeBron James", "First Team", 1,
+  2016, "Kawhi Leonard", "First Team", 1,
+  2016, "Anthony Davis", "First Team", 1,
+  2016, "James Harden", "First Team", 1,
+  2016, "Russell Westbrook", "First Team", 1,
+  2016, "Giannis Antetokounmpo", "Second Team", 1,
+  2016, "Kevin Durant", "Second Team", 1,
+  2016, "Rudy Gobert", "Second Team", 1,
+  2016, "Stephen Curry", "Second Team", 1,
+  2016, "Isaiah Thomas", "Second Team", 1,
+  2016, "Draymond Green", "Third Team", 1,
+  2016, "Jimmy Butler", "Third Team", 1,
+  2016, "DeAndre Jordan", "Third Team", 1,
+  2016, "John Wall", "Third Team", 1,
+  2016, "DeMar DeRozan", "Third Team", 1,
+
+  2017, "LeBron James", "First Team", 1,
+  2017, "Kevin Durant", "First Team", 1,
+  2017, "Anthony Davis", "First Team", 1,
+  2017, "James Harden", "First Team", 1,
+  2017, "Damian Lillard", "First Team", 1,
+  2017, "LaMarcus Aldridge", "Second Team", 1,
+  2017, "Giannis Antetokounmpo", "Second Team", 1,
+  2017, "Joel Embiid", "Second Team", 1,
+  2017, "DeMar DeRozan", "Second Team", 1,
+  2017, "Russell Westbrook", "Second Team", 1,
+  2017, "Paul George", "Third Team", 1,
+  2017, "Jimmy Butler", "Third Team", 1,
+  2017, "Karl-Anthony Towns", "Third Team", 1,
+  2017, "Stephen Curry", "Third Team", 1,
+  2017, "Victor Oladipo", "Third Team", 1,
+
+  2018, "Giannis Antetokounmpo", "First Team", 1,
+  2018, "Paul George", "First Team", 1,
+  2018, "Nikola Jokić", "First Team", 1,
+  2018, "James Harden", "First Team", 1,
+  2018, "Stephen Curry", "First Team", 1,
+  2018, "Kevin Durant", "Second Team", 1,
+  2018, "Kawhi Leonard", "Second Team", 1,
+  2018, "Joel Embiid", "Second Team", 1,
+  2018, "Damian Lillard", "Second Team", 1,
+  2018, "Kyrie Irving", "Second Team", 1,
+  2018, "Blake Griffin", "Third Team", 1,
+  2018, "LeBron James", "Third Team", 1,
+  2018, "Rudy Gobert", "Third Team", 1,
+  2018, "Russell Westbrook", "Third Team", 1,
+  2018, "Kemba Walker", "Third Team", 1,
+
+  2020, "Giannis Antetokounmpo", "First Team", 1,
+  2020, "Kawhi Leonard", "First Team", 1,
+  2020, "Nikola Jokić", "First Team", 1,
+  2020, "Stephen Curry", "First Team", 1,
+  2020, "Luka Dončić", "First Team", 1,
+  2020, "Julius Randle", "Second Team", 1,
+  2020, "LeBron James", "Second Team", 1,
+  2020, "Joel Embiid", "Second Team", 1,
+  2020, "Chris Paul", "Second Team", 1,
+  2020, "Damian Lillard", "Second Team", 1,
+  2020, "Jimmy Butler", "Third Team", 1,
+  2020, "Paul George", "Third Team", 1,
+  2020, "Rudy Gobert", "Third Team", 1,
+  2020, "Bradley Beal", "Third Team", 1,
+  2020, "Kyrie Irving", "Third Team", 1,
+
+  2021, "Giannis Antetokounmpo", "First Team", 1,
+  2021, "Jayson Tatum", "First Team", 1,
+  2021, "Nikola Jokić", "First Team", 1,
+  2021, "Devin Booker", "First Team", 1,
+  2021, "Luka Dončić", "First Team", 1,
+  2021, "DeMar DeRozan", "Second Team", 1,
+  2021, "Kevin Durant", "Second Team", 1,
+  2021, "Joel Embiid", "Second Team", 1,
+  2021, "Ja Morant", "Second Team", 1,
+  2021, "Stephen Curry", "Second Team", 1,
+  2021, "Pascal Siakam", "Third Team", 1,
+  2021, "LeBron James", "Third Team", 1,
+  2021, "Karl-Anthony Towns", "Third Team", 1,
+  2021, "Chris Paul", "Third Team", 1,
+  2021, "Trae Young", "Third Team", 1,
+
+  2022, "Giannis Antetokounmpo", "First Team", 1,
+  2022, "Jayson Tatum", "First Team", 1,
+  2022, "Joel Embiid", "First Team", 1,
+  2022, "Shai Gilgeous-Alexander", "First Team", 1,
+  2022, "Luka Dončić", "First Team", 1,
+  2022, "Jimmy Butler", "Second Team", 1,
+  2022, "Jaylen Brown", "Second Team", 1,
+  2022, "Nikola Jokić", "Second Team", 1,
+  2022, "Donovan Mitchell", "Second Team", 1,
+  2022, "Stephen Curry", "Second Team", 1,
+  2022, "Julius Randle", "Third Team", 1,
+  2022, "LeBron James", "Third Team", 1,
+  2022, "Domantas Sabonis", "Third Team", 1,
+  2022, "De’Aaron Fox", "Third Team", 1,
+  2022, "Damian Lillard", "Third Team", 1,
+
+  2023, "Giannis Antetokounmpo", "First Team", 1,
+  2023, "Luka Dončić", "First Team", 1,
+  2023, "Shai Gilgeous-Alexander", "First Team", 1,
+  2023, "Nikola Jokić", "First Team", 1,
+  2023, "Jayson Tatum", "First Team", 1,
+  2023, "Jalen Brunson", "Second Team", 1,
+  2023, "Anthony Davis", "Second Team", 1,
+  2023, "Kevin Durant", "Second Team", 1,
+  2023, "Anthony Edwards", "Second Team", 1,
+  2023, "Kawhi Leonard", "Second Team", 1,
+  2023, "Devin Booker", "Third Team", 1,
+  2023, "Stephen Curry", "Third Team", 1,
+  2023, "Tyrese Haliburton", "Third Team", 1,
+  2023, "LeBron James", "Third Team", 1,
+  2023, "Domantas Sabonis", "Third Team", 1,
+
+  2024, "Giannis Antetokounmpo", "First Team", 1,
+  2024, "Shai Gilgeous-Alexander", "First Team", 1,
+  2024, "Nikola Jokić", "First Team", 1,
+  2024, "Donovan Mitchell", "First Team", 1,
+  2024, "Jayson Tatum", "First Team", 1,
+  2024, "Jalen Brunson", "Second Team", 1,
+  2024, "Stephen Curry", "Second Team", 1,
+  2024, "Anthony Edwards", "Second Team", 1,
+  2024, "LeBron James", "Second Team", 1,
+  2024, "Evan Mobley", "Second Team", 1,
+  2024, "Cade Cunningham", "Third Team", 1,
+  2024, "Tyrese Haliburton", "Third Team", 1,
+  2024, "James Harden", "Third Team", 1,
+  2024, "Karl-Anthony Towns", "Third Team", 1,
+  2024, "Jalen Williams", "Third Team", 1
+)
+
+bb <- season_stats |> 
+  left_join(all_nba_data |>  select(season, PLAYER_NAME, all_nba),
+    by = c("season", "PLAYER_NAME")) |> 
+  mutate(all_nba = if_else(is.na(all_nba), 0, all_nba)) |> 
+  select(PLAYER_NAME, AGE, GP, MIN, PTS, AST, REB, FGA, FGM, FG3A, FTA, STL, BLK, TOV, FG_PCT, FT_PCT, DD2, season, all_nba)
+
+```
+
+
+```{r}
+
+set.seed(112)
+keep <- sample(1:nrow(bb), 700)
+
+mytrain <- bb[keep, ]
+mytest <- bb[-keep, ]
+```
+
+```{r}
+glm6 <- glm(all_nba ~ PTS + AST + REB + FGM + STL + BLK + TOV + FG_PCT, data=mytrain, family = binomial)
+#summary(glm6)
+
+```
+
+
+# Intro
+
+The goal of this logistic regression model is to try to predict the players who will make an All NBA team at the end of a season. Creating a model from the data of the past decade, excluding the Covid season that was 2019 - 20. The created model had an overall accuracy of about 96%, and correctly predicted 21 out of the 29 players to make an all NBA team out of a pool of about 250 players. After exploring some possible stats to use, a model with 8 predictors was used. One other thing to note is that until 2023, the all NBA teams had position locks, 6 guards, 6 wings, and 3 centers, which no longer exists.
+
+# Model
+
+One thing that should be kept in mind, is that a high accuracy does not tell much, there are a lot of NBA players, and only 15 make an all NBA team each season. Players were filtered to eligible players first, meaning they must have player at least 65 games (which was the main reason the Covid season was excluded),  then another way we limited the number of players was only including players who averaged over 10 points per game for the season. We could not use a higher cutoff as players like Draymond Green and Rudy Gobert have scored just over 10 points per game and still made the all NBA teams. 
+
+
+$$
+\underbrace{\hat{Y}_i}_{\text{Pred. all\_nba}}
+=
+-26.3
++ 0.818\underbrace{X_{1i}}_{\text{PTS}}
++ 0.595\underbrace{X_{2i}}_{\text{AST}}
++ 0.231\underbrace{X_{3i}}_{\text{REB}}
+- 0.932\underbrace{X_{4i}}_{\text{FGM}}
++ 1.86\underbrace{X_{5i}}_{\text{STL}}
++ 1.03\underbrace{X_{6i}}_{\text{BLK}}
+- 1.12\underbrace{X_{7i}}_{\text{TOV}}
++ 20.3\underbrace{X_{8i}}_{\text{FG\_PCT}}
+$$
+
+The created model was additive and did not use any interaction terms. The predictors used were points per game (PTS), assists per game (AST), rebounds per game (REB), field goals made per game (FGM), steals per game (STL), blocks per game (BLK), turnovers per game (TOV), and field goal percentage (FG_PCT). 
+
+## Model Interpretation
+
+Lets first look at a summary of the model.
+
+```{r}
+summary(glm6)
+```
+
+With an alpha of .05, all p values for this model are significant. A different model was able to get a lower AIC of about 197, but that model did not have all significant terms, and had a lower accuracy, so this model was chosen. In order to interpret this model further, we must do some calculations.
+
+```{r}
+# Interpreting
+
+b <- coef(glm6)
+
+# interc for intercept, interp for interpretation
+interc <- (exp(b[1]) / (1 + exp(b[1])))
+
+pander(interc)
+
+```
+
+The intercept value is extremely small, which makes sense. This is telling us that when every predictor is at 0, the probability of a player making the all NBA team is basically 0%, which makes complete sense. Lets look at each of the predictors now.
+
+```{r}
+PTS_interp <- exp(b[2])
+AST_interp <- exp(b[3])
+REB_interp <- exp(b[4])
+FGM_interp <- exp(b[5])
+STL_interp <- exp(b[6])
+BLK_interp <- exp(b[7])
+TOV_interp <- exp(b[8])
+FG_PCT_interp <- exp(0.01 * b[9])
+
+numbers <- c(PTS_interp, AST_interp, REB_interp, FGM_interp, STL_interp, BLK_interp, TOV_interp, FG_PCT_interp)
+df <- as.data.frame(t(numbers))
+colnames(df) <- c("PTS", "AST", "REB","FGM", "STL", "BLK", "TOV", "FG_PCT")
+
+pander(df)
+```
+
+To understand these numbers, the amount above/below 1 is the percent change in odds for every increase/decrease in a value of 1 of that predictor, except for FG_PCT, which is for changes in .01 instead.
+So from this table we see that an increase in 1 steal has the biggest impact, increasing odds by about 544%, and considering steals and blocks are generally range from about 0 to 3, it makes sense that a change of 1 in these stats has a higher impact. Points also having a higher impact is also not too surprising, since players who make all NBA teams with few points are the exception, and not typical.  Turnovers having a value of about .33 means that an increase in 1 turnovers per game means that player has 67% decrease in odds to make the all NBA team. This makes sense, but FGM also being less than 1 is a surprising. Generally players who make more shots are the players who get more points, and those that make the most make the all NBA team. However this may have a negative impact since both FGM and PTS are in the model, so for each made field goal, the odds go down, but the made shot also means points increased, meaning overall the odds went up to make the all NBA team. Note that taking out FGM or replacing it with field goals attempted was tried, but did not improve the model. So interpreting the FGM term can be confusing, as it should mean each other term is held constant, but if FGM goes up, so does PTS. Overall it is best to ignore the FGM interpretation in a void. However, all other terms make sense on their own.
+
+## Model Validation
+
+Lets take a closer look at the process of validating the model. The data collected and used combined to 947 players, and the model was trained on 700 players, the remaining 247 players were in a test data set, which was used to see the performance of the model.
+
+```{r}
+myprobs3 <- predict(glm6, newdata=mytest, type="response")
+
+callit3 <- ifelse(myprobs3 > .5, 1, 0)
+
+mycm3 <- table(callit3, mytest$all_nba)
+
+pcc3 <- (mycm3[1] +  mycm3[4]) / (sum(mycm3))
+
+
+pander(mycm3)
+```
+
+From this table we can see that of the test data set, there were 29 players that made an all NBA team, and the model was able to predict 21 of them. The model made more mistakes of thinking a player was not an all NBA player when they were, rather than thinking a player was an all NBA player and they in reality were not. As we can see the high amount of players in the model correctly predicted as not all NBA players is the reason accuracy alone can be misleading. The model had a recall score (how well the model predicted players who made all NBA) of about 72%.
+
+# Model Visualization
+
+```{r}
+PTSavg <- mean(bb$PTS)
+ASTavg <- mean(bb$AST)
+REBavg <- mean(bb$REB)
+FGMavg <- mean(bb$FGM)
+STLavg <- mean(bb$STL)
+BLKavg <- mean(bb$BLK)
+TOVavg <- mean(bb$TOV)
+FG_PCTavg <- mean(bb$FG_PCT)
+
+allstar_avg <- data.frame(
+  PTS = 24.5,
+  AST = 5.52,
+  REB = 6.57,
+  FGM = 8.70,
+  STL = 1.15,
+  BLK = 0.76,
+  TOV = 2.73,
+  FG_PCT = 0.505
+)
+
+#predict(glm6, newdata = allstar_avg, type = "response")
+#(exp(0.6512214 ) / (1 + exp(0.6512214)))
+```
+
+```{r, fig.width=8}
+#| fig-align: center
+
+ggplot(bb, aes(x=PTS, y=all_nba)) +
+  geom_point(alpha = .3, pch = 19, size = 3, color = "coral2") +
+  stat_function(aes(color = "All other stats = 0"), fun = function (x) 1/(1+exp(-(b[1] + b[2]*x + b[3]*0 + b[4]*0 + b[5]*0 + b[6]*0 + b[7]*0 + b[8]*0 + b[9]*0))), linewidth = .9) + # every predictor as 0 (other than points)
+  stat_function(aes(color = "Average player in model data"), fun = function (x) 1/(1+exp(-(b[1] + b[2]*x + b[3]*3.451637 + b[4]*5.531468 + b[5]*5.865153 + b[6]*0.9541711 + b[7]*0.5795143 + b[8]*1.849208 + b[9]*0.4725818))), linewidth = .9) + # player averages (just our dataset, not entire league averages)
+  stat_function(aes(color = "2025-26 All-Star average"), fun = function (x) 1/(1+exp(-(b[1] + b[2]*x + b[3]*5.52 + b[4]*6.57 + b[5]*8.70 + b[6]*1.15 + b[7]*0.76 + b[8]*2.73 + b[9]*.505))), linewidth = .9) + # Averages of ALL Star players this season (2025-26) (calculated externaly)
+  scale_color_manual(
+    values = c(
+      "All other stats = 0" = "black",
+      "Average player in model data" = "red3",
+      "2025-26 All-Star average" = "green4")) +
+  geom_vline(xintercept = 24.5, color="green4", linewidth = .8) +
+  geom_vline(xintercept = 16.02344, color="red4", linewidth = .8) +
+  annotate(
+    "text",
+    x = 16.02344, y = 0.15,
+    label = "Model avg PPG",
+    color = "red4", size = 3, hjust = 1.05) +
+  annotate(
+    "text",
+    x = 24.5, y = 0.54,
+    label = "All-Star avg PPG",
+    color = "green4", size = 3, hjust = -.05) +
+  labs(
+    title = "Predicted Probability Player Makes All NBA Team by Points Per Game",
+    subtitle = "Each curve holds the model variables fixed at a different profile",
+    x = "Points Per Game",
+    y = "Probability Player Makes All NBA",
+    color = "Curve Profile"
+  ) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+    legend.position = "top",
+    legend.title = element_text(face = "bold"),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(size = 10))
+```
+
+
+The graph shows how the model predicts the probability that a player makes an all NBA team as points per game increase, while the other variables are held fixed at different profiles. The black curve represents a baseline case where all other statistics are set to 0, so it is mainly included as a reference. The two main curves to focus on are the red and green lines.
+
+The red curve uses the average values of the players in the model dataset. At the red vertical line, which marks the average points per game for that group, the predicted probability is still very close to 0%. This suggests that an average player in the filtered dataset would still be unlikely to make an all NBA team.
+
+The green curve uses the average values of players selected as 2025–26 all Stars. At the green vertical line, which marks the All-Star average of 24.5 points per game, the model predicts a probability of making all NBA of a little over 65%.
+
+The most interesting thing about this graph is that the red line is above the green line, meaning if the points are equal, the averages of the players in the model data lead to a higher prediction compared to the averages of current all star players. Which is surprising as the stats for the all stars is higher for each stat. That does include higher turnovers and FGM, which lead to the curve being lower.
+
+# Predicting 2025-26 All NBA
+
+By finding the probability for each player to make the all NBA team, then selecting the 15 players with the best probability, we get the following list of players.
+
+```{r}
+nba <- nba_current |> 
+  rename(
+    `Player Name` = Player,
+    GP = G,
+    REB = TRB,
+    FGM = FG,
+    FG_PCT = `FG%`
+  ) |> 
+  filter(GP > 58, `Player Name` != "Luka Dončić", `Player Name` != "Anthony Edwards") |>  #not 65 as there are more games to be played, there are some players who are hurt who may come back in time to get 65 games, or might not.
+  select(`Player Name`, PTS, AST, REB, FGM, STL, BLK, TOV, FG_PCT)
+
+
+nba_pred <- nba |> 
+  mutate(
+    pred_prob = predict(glm6, newdata = nba, type = "response"),
+    `Predicted Probability` = round(pred_prob * 100, 1)
+  ) |> 
+  arrange(desc(pred_prob)) |> 
+  slice_head(n = 15) |> 
+  select(`Player Name`, `Predicted Probability`)
+
+
+pander(nba_pred)
+```
+
+If you are curious about these players stats, they are shown below.
+
+
+```{r}
+nba_pred_stats <- nba |> 
+  mutate(
+    pred_prob = predict(glm6, newdata = nba, type = "response"),
+    `Predicted Probability` = round(pred_prob * 100, 1)
+  ) |> 
+  arrange(desc(pred_prob)) |> 
+  slice_head(n = 15) |> 
+  select(-c(pred_prob, `Predicted Probability`))
+
+pander(nba_pred_stats)
+```
+
+All these players seem to be elite, and this list of players does not create any alarm suggesting a redo of the model.
+Players who are or expected to be ineligible at the end of the season were removed (Luka Dončić, Anthony Edwards)
+
+The official prediction from this model, based on the stats of players in the 2025-26 season (Note: the season is not over yet, there are still a handful of games for each team, fringe players who may end up eligible or not are Cade Cunningham, Victor Wembanyama, Kawhi Leonard, Nikola Jokić, these player *italicized* to highlight them)
+
+ALL NBA First Team consisting of *Nikola Jokić*, Shai Gilgeous-Alexander, Tyrese Maxey, *Kawhi Leonard*, *Victor Wembanyama*
+
+ALL NBA Second Team consisting of *Cade Cunningham*, Donovan Mitchell, Jamal Murray, Jalen Johnson, Jaylen Brown
+
+ALL NBA Third Team consisting of James Harden, Jalen Duren, Kevin Durant, Jalen Brunson, Alperen Şengün
+
+The players below are the next most likely if some of the fringe players end up not making eligibility. To improve upon the model, including team success in some way could benefit it, but I did not have that in the data I used.
+
+```{r}
+injury_reserve <- nba |> 
+    mutate(
+    pred_prob = predict(glm6, newdata = nba, type = "response"),
+    `Predicted Probability` = round(pred_prob * 100, 1)
+  ) |> 
+  arrange(desc(pred_prob)) |> 
+  slice_head(n = 19) |>
+  slice_tail(n = 4) |> 
+  select(`Player Name`, `Predicted Probability`)
+  
+
+pander(injury_reserve)
+```
+
+
+
+```{r}
+# These 2 code chunks is my exploring my chosen variables, and finding a model.
+
+# Exploring some models
+
+glm1 <- glm(all_nba ~ PTS + MIN + FTA + DD2 + FGM, data=mytrain, family = binomial)
+#summary(glm1)
+
+glm2 <- glm(all_nba ~ GP + MIN + PTS + AST + REB + FGA + FGM + FG3A + FTA + STL + BLK + TOV + FG_PCT + FT_PCT + DD2, data=mytrain, family = binomial)
+#summary(glm2)
+
+glm3 <- glm(all_nba ~ GP + MIN + PTS + AST + REB + STL + BLK + TOV, data=mytrain, family = binomial)
+#summary(glm3)
+
+glm4 <- glm(all_nba ~ GP + MIN + FGA + FGM + FG3A + FTA + FG_PCT + FT_PCT + DD2, data=mytrain, family = binomial)
+#summary(glm4)
+
+glm5 <- glm(all_nba ~ PTS + AST + REB + FGA + FGM + FG3A + FTA + STL + BLK + TOV + FG_PCT + FT_PCT + DD2, data=mytrain, family = binomial)
+#summary(glm5)
+
+glm6 <- glm(all_nba ~ PTS + AST + REB + FGM + STL + BLK + TOV + FG_PCT, data=mytrain, family = binomial)
+#summary(glm6)
+
+```
+
+
+```{r}
+myprobs1 <- predict(glm1, newdata=mytest, type="response")
+myprobs2 <- predict(glm2, newdata=mytest, type="response")
+myprobs3 <- predict(glm6, newdata=mytest, type="response")
+myprobs4 <- predict(glm4, newdata=mytest, type="response") 
+myprobs5 <- predict(glm5, newdata=mytest, type="response")
+
+callit1 <- ifelse(myprobs1 > .5, 1, 0)
+callit2 <- ifelse(myprobs2 > .5, 1, 0)
+callit3 <- ifelse(myprobs3 > .5, 1, 0)
+callit4 <- ifelse(myprobs4 > .5, 1, 0) 
+callit5 <- ifelse(myprobs5 > .5, 1, 0)
+
+mycm1 <- table(callit1, mytest$all_nba)
+mycm2 <- table(callit2, mytest$all_nba)
+mycm3 <- table(callit3, mytest$all_nba)
+mycm4 <- table(callit4, mytest$all_nba) 
+mycm5 <- table(callit5, mytest$all_nba)
+
+pcc1 <- (mycm1[1] +  mycm1[4]) / (sum(mycm1))
+pcc2 <- (mycm2[1] +  mycm2[4]) / (sum(mycm2))
+pcc3 <- (mycm3[1] +  mycm3[4]) / (sum(mycm3))
+pcc4 <- (mycm4[1] +  mycm4[4]) / (sum(mycm4)) 
+pcc5 <- (mycm5[1] +  mycm5[4]) / (sum(mycm5))
+
+
+#mycm1
+#mycm2
+#mycm3
+#mycm4
+#mycm5
+
+
+#pcc1
+#pcc2
+#pcc3
+#pcc4
+#pcc5
+
+```
+
+## References
+
+[Source for Current NBA Data](https://www.basketball-reference.com/leagues/NBA_2026_per_game.html)
+
+[All other data gathered from hoopR package](https://hoopr.sportsdataverse.org/index.html)
+
+[ALL NBA teams](https://www.nba.com/news/history-all-nba-teams)
