@@ -558,7 +558,7 @@ pander(nba_pred_stats)
 All these players seem to be elite, and this list of players does not create any alarm suggesting a redo of the model.
 Players who are or expected to be ineligible at the end of the season were removed (Luka Dončić, Anthony Edwards)
 
-The official prediction from this model, based on the stats of players in the 2025-26 season (Note: the season is not over yet, there are still a handful of games for each team, fringe players who may end up eligible or not are Cade Cunningham, Victor Wembanyama, Kawhi Leonard, Nikola Jokić, these player *italicized* to highlight them)
+The official prediction from this model, based on the stats of players in the 2025-26 season (Note: the season is not over yet, there are still a handful of games for each team, fringe players who may end up eligible or not are Cade Cunningham, Victor Wembanyama, Kawhi Leonard, and Nikola Jokić. These player *italicized* to highlight them)
 
 ALL NBA First Team consisting of *Nikola Jokić*, Shai Gilgeous-Alexander, Tyrese Maxey, *Kawhi Leonard*, *Victor Wembanyama*
 
