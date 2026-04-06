@@ -6,6 +6,7 @@ format:
   html:
     self-contained: true
     page-layout: full
+    lightbox: true
     title-block-banner: true
     toc: true
     toc-depth: 3
