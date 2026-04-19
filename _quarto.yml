@@ -54,7 +54,7 @@ website:
         - text: "All NBA Teams Prediction"
           file: NBA_Projects/project2.qmd
         - text: "---"
-        - text: "Project 3"
+        - text: "NBA Player Archetype Analyzer"
           file: NBA_Projects/project3.qmd
         - text: "---"
     - title: "Data Exploration"

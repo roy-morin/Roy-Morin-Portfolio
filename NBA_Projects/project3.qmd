@@ -1,5 +1,5 @@
 ---
-title: "Unsupervised Machine Learning Model - [NBA Player Archetype Analyser]"
+title: "Unsupervised Machine Learning Model - [NBA Player Archetype Analyzer]"
 subtitle: "Course CSE 450"
 author: "[Roy Morin]"
 format:
@@ -100,7 +100,7 @@ data was used, and these bigger-name players were in other groups for most seaso
 a season here or there, struggling with injuries, or while still young before their prime, leading 
 to their name popping up in this group that ended up being named “Low Confidence Fringe 
 Role”. But after deciding the 8 labels for the groups, the model was applied to the test data 
-(2024-25 season), and the results were analysed and displayed. 
+(2024-25 season), and the results were analyzed and displayed. 
 
 
 
