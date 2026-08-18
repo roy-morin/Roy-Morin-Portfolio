@@ -54,7 +54,6 @@ __Green River Star__
 - Pick up newspapers, fold them, and deliver them in a timely manner. 
 
 
-
 __The UPS Store__
 
 `Data Analyst Intern (2025 May - September, Rock Springs, Wyoming)`
@@ -66,6 +65,7 @@ __The UPS Store__
 - Created payroll budgeting, break-even, and what-if models to help management evaluate labor costs, operating expenses, profitability, and revenue requirements.
 
 - Automated the cleaning and analysis of profit-and-loss data across four UPS Store locations, reducing the manual work required to compare store performance.
+
 
 ## Tools
 
