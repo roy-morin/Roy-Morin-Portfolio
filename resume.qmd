@@ -35,6 +35,20 @@ __Statistics__
 - Created machine learning models with Wordle data with R.
 
 
+
+__The UPS Store__
+
+`Data Analyst Intern (2025 May - September, Rock Springs, Wyoming)`
+
+- Developed four R Shiny prototype applications that gave management centralized access to financial reporting and interactive business-planning tools.
+
+- Analyzed four years of financial data to calculate and visualize gross margins by location, year, and product or service category.
+
+- Created payroll budgeting, break-even, and what-if models to help management evaluate labor costs, operating expenses, profitability, and revenue requirements.
+
+- Automated the cleaning and analysis of profit-and-loss data across four UPS Store locations, reducing the manual work required to compare store performance.
+
+
 __City of Green River Parks and Recreation Department__
 
 `Seasonal Operations Assistant (May - August of 2021 - 2023, Green River, Wyoming)`
@@ -53,18 +67,6 @@ __Green River Star__
 
 - Pick up newspapers, fold them, and deliver them in a timely manner. 
 
-
-__The UPS Store__
-
-`Data Analyst Intern (2025 May - September, Rock Springs, Wyoming)`
-
-- Developed four R Shiny prototype applications that gave management centralized access to financial reporting and interactive business-planning tools.
-
-- Analyzed four years of financial data to calculate and visualize gross margins by location, year, and product or service category.
-
-- Created payroll budgeting, break-even, and what-if models to help management evaluate labor costs, operating expenses, profitability, and revenue requirements.
-
-- Automated the cleaning and analysis of profit-and-loss data across four UPS Store locations, reducing the manual work required to compare store performance.
 
 
 ## Tools
