@@ -1,10 +1,26 @@
 ---
-title: "about me"
-subtitle: "my data science portfolio"
+title: "About Me"
+subtitle: "My Data Science Portfolio"
 # use quarto markdown to 
 ---
 
-# Title 1 Header
-## Title 2 Header
+# Me
+ 
+  My name is Roy Morin, and I was raised in Green River, Wyoming my whole life. After high school I went to Western Wyoming Community College and initially majored in an Engineering field, but switched to Mathematics after realizing I enjoyed the Math more than the Science that I had taken so far. I ended up getting an Associates degree in Mathematics, then transferred to Brigham Young University Idaho where I explored more options for degrees in the Mathematics field. I ultimately decided on a Statistics degree, because while I did struggle the most with the statistics class I took before, it was personally the most interesting to learn.
+  
+## My Interests
+  
+  I love to follow sports, and am most knowledgeable of the NBA and basketball, which is why I have so many projects about the NBA. But I also love Football, and since the recent World Cup I have gained some interest in Soccer as well. My second favorite sport to play however is Tennis, although I am not able to watch most professional Tennis tournaments.
 
-[MarkDown Basics](https://quarto.org/docs/authoring/markdown-basics.html#links-images)
+  Another interest to me is video games, growing up I had a GameCube then an Xbox, but now I mostly enjoy games on my laptop. I enjoy a wide variety of games from competitive player vs player games to single player or cooperative survival or adventure or puzzle games. My most played game would be League of Legends, a complex 5 versus 5 MOBA game, I enjoy playing the game, as well as watching the highest level of Esports for every major international event.
+
+## Current Project Goals
+
+  I am currently working on a analysis on the tested NBA free throw rule as well as an alternate less complicated version for simpler comparisons and takeaways. I plan to complete it before the NBA season starts in October.
+  
+  I plan on starting other new projects outside of the NBA that are related to video games, mainly Pokemon or League of Legends. Both of which have a place for analysis, and have data I can find and use. Those two games are also fun to me for the room for creativity from the wide range of possibilities in team building from many over 900 Pokemon, as well as the complexity of over 100 champions as well as items and runes among other parts within League of Legends.
+
+
+
+I’m continuing to build projects that combine statistics with questions I find interesting. You can explore my projects here, view my resume, or connect with me on LinkedIn.
+
